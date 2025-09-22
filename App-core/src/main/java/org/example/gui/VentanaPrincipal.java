@@ -1,10 +1,7 @@
 package org.example.gui;
 
 
-import org.example.core.AppContext;
-import org.example.core.AudioRecorder;
-import org.example.core.FiltroExecutor;
-import org.example.core.PluginManager;
+import org.example.core.*;
 import org.example.interfaces.PluginFiltro;
 
 import javax.swing.*;
@@ -28,11 +25,13 @@ public class VentanaPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // --- Barra de menú ---
+
+
+// --- Barra de menú ---
         JMenuBar menuBar = new JMenuBar();
         JMenu menuPlugins = new JMenu("Plugins");
 
-        // cargar plugins dinámicamente
+// cargar plugins dinámicamente
         List<PluginFiltro> plugins = pluginManager.cargarPlugins();
         if (plugins.isEmpty()) {
             JMenuItem noPlugins = new JMenuItem("No hay plugins cargados");
@@ -42,19 +41,18 @@ public class VentanaPrincipal extends JFrame {
             for (PluginFiltro plugin : plugins) {
                 JRadioButtonMenuItem item = new JRadioButtonMenuItem(plugin.getNombre());
                 item.addActionListener(e -> {
-                    // construyo contexto: si existe grabacion.wav la uso por defecto
-                    AppContext contexto = new AppContext();
-                    File recorded = new File("grabacion.wav");
-                    if (recorded.exists() && recorded.canRead()) {
-                        contexto.setUltimoArchivoAudio(recorded);
-                    } else {
-                        // pedir al usuario un archivo (opcional)
+                    AppContext contexto = AppContextSingleton.get(); // usamos una única instancia compartida
+
+                    // si no hay archivo cargado todavía, pedir al usuario
+                    // Solo si el plugin requiere archivo inicial
+                    if (plugin.requiereArchivoInicial() && contexto.getUltimoArchivoAudio() == null) {
                         JFileChooser chooser = new JFileChooser();
                         int ret = chooser.showOpenDialog(this);
                         if (ret == JFileChooser.APPROVE_OPTION) {
-                            contexto.setUltimoArchivo(chooser.getSelectedFile());
+                            contexto.setUltimoArchivoAudio(chooser.getSelectedFile());
                         }
                     }
+
 
                     FiltroExecutor executor = new FiltroExecutor();
                     String resultado = executor.ejecutarFiltro(plugin, contexto);
@@ -72,15 +70,23 @@ public class VentanaPrincipal extends JFrame {
         menuBar.add(menuPlugins);
         setJMenuBar(menuBar);
 
-        // --- Panel principal ---
+// --- Panel principal ---
         JLabel label = new JLabel("Bienvenido al núcleo de la aplicación", SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 16));
         add(label, BorderLayout.NORTH);
 
         JButton grabarBtn = new JButton("Grabar 5sg");
         grabarBtn.addActionListener(e -> {
-            File output = new File("grabacion.wav");
+            // Generar nombre único con timestamp
+            String nombreArchivo = "grabacion_" + System.currentTimeMillis() + ".wav";
+            File output = new File(nombreArchivo);
+
             audioRecorder.startRecording(output, 5);
+
+            // actualizar AppContext con el nuevo archivo
+            AppContext contexto = AppContextSingleton.get();
+            contexto.setUltimoArchivoAudio(output);
+
             JOptionPane.showMessageDialog(this,
                     "Grabación finalizada.\nArchivo: " + output.getAbsolutePath(),
                     "Grabación", JOptionPane.INFORMATION_MESSAGE);
@@ -89,5 +95,6 @@ public class VentanaPrincipal extends JFrame {
         JPanel panelCentro = new JPanel();
         panelCentro.add(grabarBtn);
         add(panelCentro, BorderLayout.CENTER);
+
     }
 }

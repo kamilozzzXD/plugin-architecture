@@ -10,4 +10,7 @@ public interface PluginFiltro {
     String getDescripcion();
     boolean soportaTipo(String tipoArchivo);
     String ejecutar(AppContext contexto);
+    default boolean requiereArchivoInicial() {
+        return true; // por defecto sí requiere archivo
+    }
 }

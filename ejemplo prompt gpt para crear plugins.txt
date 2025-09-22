@@ -1,0 +1,15 @@
+Se quiere desarrollar un plugin, se tiene el core el cual es app-core y se le agregaran plugins. analiza completamente ambos archivos , el archivo llamado "PLUGIN - Guia de desarrollo.pdf" es la guia suministrada por el lider del proyecto (osea yo) sin embargo como lider tambien tengo que ayudar a mi equipo a desarrollar los plugins. el archivo "app-core.txt" es el codigo y la estructura de carpetas  ese es el core que pone las reglas para que los demas plugins puedan conectarsen por decirlo asi. La idea es realizar el segundo plugin "1.	Reproducir archivo de audio
+Entrada: archivo de audio.
+Acción: reproducirlo en la aplicación.
+2.	Persistir archivo en base de datos
+Entrada: archivo de audio.
+Acción: guardar el archivo en la BD.
+3.	Listar archivos guardados en base de datos
+Entrada: nada.
+Acción: mostrar lista de audios almacenados.
+
+" de acuerdo al documento de planeacion osea la guia . como resultado tuyo espero que analices completamente los dos archivos para que entiendas que se quiere hacer, como se quiere hacer, que se ha hecho, y que falta hacer, y por su puesto un plantemiento teorico inicial del tercer plugin. y digo teorico para que todavia no me des codigo sino que entiendas como funcionara este plugin y como se deber integrar como plugin al core y ahi si comenzaremos a desarrollarlo. para listar archivos de audio guardados en base de datos se hara en base de datos H2 y esta es su configuracion "// Configuración H2 
+    private final String h2Url = "jdbc:h2:~/tabla";
+    private final String h2User = "sa";
+    private final String h2Password = "";
+    "

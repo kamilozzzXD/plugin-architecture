@@ -7,7 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="plugin-reproducir-audio" />
+        <module name="Plugin-listar-archivos-guardados-BD" />
         <module name="text-processing-plugin-architecture" />
+        <module name="Plugin-persistir-archivo-Audio-BD" />
       </profile>
     </annotationProcessing>
   </component>
