@@ -1,7 +1,9 @@
 package org.example.gui;
 
 
+import org.example.core.AppContext;
 import org.example.core.AudioRecorder;
+import org.example.core.FiltroExecutor;
 import org.example.core.PluginManager;
 import org.example.interfaces.PluginFiltro;
 
@@ -40,9 +42,26 @@ public class VentanaPrincipal extends JFrame {
             for (PluginFiltro plugin : plugins) {
                 JRadioButtonMenuItem item = new JRadioButtonMenuItem(plugin.getNombre());
                 item.addActionListener(e -> {
+                    // construyo contexto: si existe grabacion.wav la uso por defecto
+                    AppContext contexto = new AppContext();
+                    File recorded = new File("grabacion.wav");
+                    if (recorded.exists() && recorded.canRead()) {
+                        contexto.setUltimoArchivoAudio(recorded);
+                    } else {
+                        // pedir al usuario un archivo (opcional)
+                        JFileChooser chooser = new JFileChooser();
+                        int ret = chooser.showOpenDialog(this);
+                        if (ret == JFileChooser.APPROVE_OPTION) {
+                            contexto.setUltimoArchivo(chooser.getSelectedFile());
+                        }
+                    }
+
+                    FiltroExecutor executor = new FiltroExecutor();
+                    String resultado = executor.ejecutarFiltro(plugin, contexto);
+
                     JOptionPane.showMessageDialog(this,
-                            "Descripción: " + plugin.getDescripcion(),
-                            "Plugin seleccionado",
+                            "Descripción: " + plugin.getDescripcion() + "\n\nResultado: " + resultado,
+                            "Plugin ejecutado",
                             JOptionPane.INFORMATION_MESSAGE);
                 });
                 grupoPlugins.add(item);

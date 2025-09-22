@@ -2,10 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Hereda del POM padre -->
     <parent>
         <groupId>org.example</groupId>
         <artifactId>plugin-architecture</artifactId>
@@ -13,43 +12,38 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>app-core</artifactId>
+    <artifactId>plugin-reproducir-audio</artifactId>
     <packaging>jar</packaging>
 
-    <name>app-core</name>
-    <description>Núcleo de la aplicación con arquitectura de plugins</description>
+    <name>plugin-reproducir-audio</name>
+    <description>Plugin para reproducir archivos de audio (WAV) con controles Play/Pause/Resume/Stop</description>
 
     <dependencies>
-        <!-- Dependencias básicas de Java Swing y sonido ya vienen en el JDK -->
-        <!-- Puedes agregar JUnit para pruebas -->
+        <!-- Dependencia hacia el núcleo -->
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>app-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Dependencia para pruebas -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Plugin de compilación para versiones modernas de Java -->
+            <!-- Compilar con Java 21 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
                     <release>21</release>
-                </configuration>
-            </plugin>
-
-            <!-- Plugin de ejecución (para poder correr con mvn exec:java) -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <mainClass>org.example.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>

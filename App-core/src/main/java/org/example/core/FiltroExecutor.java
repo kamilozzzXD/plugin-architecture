@@ -1,20 +1,24 @@
 package org.example.core;
 
-
 import org.example.interfaces.PluginFiltro;
 
 import java.io.File;
 
 public class FiltroExecutor {
 
-    public String ejecutarFiltro(PluginFiltro filtro, File archivo) {
-        if (!filtro.soportaTipo(obtenerTipoArchivo(archivo))) {
+    public String ejecutarFiltro(PluginFiltro filtro, AppContext contexto) {
+        String tipo = obtenerTipoArchivo(contexto);
+        if (!filtro.soportaTipo(tipo)) {
             return "El plugin no soporta este tipo de archivo.";
         }
-        return filtro.ejecutar(archivo);
+        return filtro.ejecutar(contexto);
     }
 
-    private String obtenerTipoArchivo(File archivo) {
+    private String obtenerTipoArchivo(AppContext contexto) {
+        File archivo = contexto.getUltimoArchivo();
+        if (archivo == null) {
+            return "desconocido";
+        }
         String nombre = archivo.getName().toLowerCase();
         if (nombre.endsWith(".mp3") || nombre.endsWith(".wav")) {
             return "audio";
