@@ -7,8 +7,11 @@ import java.io.IOException;
 public class AudioRecorder {
 
     private TargetDataLine line;
+    private File outputFile;
+    private Thread recordThread;
 
-    public void startRecording(File outputFile, int durationSeconds) {
+    public void startRecording(File outputFile) {
+        this.outputFile = outputFile;
         try {
             AudioFormat format = getAudioFormat();
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -22,7 +25,7 @@ public class AudioRecorder {
             line.open(format);
             line.start();
 
-            Thread thread = new Thread(() -> {
+            recordThread = new Thread(() -> {
                 try (AudioInputStream ais = new AudioInputStream(line)) {
                     AudioSystem.write(ais, AudioFileFormat.Type.WAVE, outputFile);
                 } catch (IOException e) {
@@ -30,24 +33,22 @@ public class AudioRecorder {
                 }
             });
 
-            thread.start();
+            recordThread.start();
+            System.out.println("Grabación iniciada.");
 
-            // detener después de cierto tiempo
-            Thread.sleep(durationSeconds * 1000);
-            stopRecording();
-
-            System.out.println("Grabación guardada en: " + outputFile.getAbsolutePath());
-
-        } catch (LineUnavailableException | InterruptedException e) {
+        } catch (LineUnavailableException e) {
             e.printStackTrace();
         }
     }
 
-    public void stopRecording() {
+    public File stopRecording() {
         if (line != null) {
             line.stop();
             line.close();
+            System.out.println("Grabación guardada en: " + outputFile.getAbsolutePath());
+            return outputFile;
         }
+        return null;
     }
 
     private AudioFormat getAudioFormat() {

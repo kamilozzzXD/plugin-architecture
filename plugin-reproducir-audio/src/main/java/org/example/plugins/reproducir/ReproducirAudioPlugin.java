@@ -2,11 +2,7 @@ package org.example.plugins.reproducir;
 
 import org.example.core.AppContext;
 import org.example.interfaces.PluginFiltro;
-import org.example.plugins.reproducir.service.ReproductorService;
-import org.example.plugins.reproducir.ui.ReproductorFrame;
 import org.example.plugins.reproducir.utils.AudioValidator;
-
-import javax.swing.*;
 import java.io.File;
 
 public class ReproducirAudioPlugin implements PluginFiltro {
@@ -18,7 +14,7 @@ public class ReproducirAudioPlugin implements PluginFiltro {
 
     @Override
     public String getDescripcion() {
-        return "Permite reproducir un archivo WAV desde la aplicación con controles Play/Pause/Resume/Stop.";
+        return "Prepara un archivo de audio para su reproducción.";
     }
 
     @Override
@@ -38,13 +34,9 @@ public class ReproducirAudioPlugin implements PluginFiltro {
             return validacion;
         }
 
-        // Abrir ventana de control en EDT
-        SwingUtilities.invokeLater(() -> {
-            ReproductorService service = new ReproductorService();
-            ReproductorFrame frame = new ReproductorFrame(archivo, service);
-            frame.setVisible(true);
-        });
-
-        return "OK: Ventana de control abierta para " + archivo.getName();
+        // The key change is here:
+        // Do NOT create a new JFrame or other UI component.
+        // Instead, just return a status message.
+        return "OK: Archivo de audio listo para reproducir.";
     }
 }

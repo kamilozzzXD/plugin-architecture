@@ -13,6 +13,8 @@
         <module>plugin-reproducir-audio</module>
         <module>plugin-persistir-archivo-Audio-BD</module>
         <module>plugin-listar-archivos-guardados-BD</module>
+        <module>ObtenerTextoAAudio</module>
+        <module>ObtenerAudioATexto</module>
     </modules>
 
 
