@@ -1,0 +1,4 @@
+org\example\Main.class
+org\example\util\AudioConverter.class
+org\example\impl\VoskAudioToText.class
+org\example\api\AudioToTextService.class

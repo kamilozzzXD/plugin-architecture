@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public class AudioRepository {
 
-    private final String h2Url = "jdbc:h2:~/tabla";
+    private final String h2Url = "jdbc:h2:file:./data/tabla";
     private final String h2User = "sa";
     private final String h2Password = "";
 
