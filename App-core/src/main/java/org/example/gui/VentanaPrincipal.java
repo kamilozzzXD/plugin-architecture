@@ -7,6 +7,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 import java.util.List;
@@ -34,6 +35,12 @@ public class VentanaPrincipal extends JFrame {
     private JButton stopBtn;
     private Clip audioClip;
 
+    // Campos de VentanaPrincipal
+    private JTable tablaAudios;
+    private DefaultTableModel modeloAudios;
+    private JButton btnSeleccionarAudio;
+
+
     private static final Logger logger = Logger.getLogger(VentanaPrincipal.class.getName());
 
     public VentanaPrincipal() {
@@ -45,6 +52,34 @@ public class VentanaPrincipal extends JFrame {
         this.reproducirAudioArea = new JTextArea(5, 20);
         this.textoAudioArea = new JTextArea(5, 20);
         this.cadenaEncontradaArea = new JTextArea(5, 20);
+
+        String[] columnNames = {"ID", "Nombre", "Ruta", "Fecha", "Existe"};
+        modeloAudios = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tablaAudios = new JTable(modeloAudios);
+        btnSeleccionarAudio = new JButton("Seleccionar");
+
+// Acción seleccionar
+        btnSeleccionarAudio.addActionListener(e -> {
+            int sel = tablaAudios.getSelectedRow();
+            if (sel < 0) {
+                JOptionPane.showMessageDialog(this,
+                        "Selecciona primero un registro.",
+                        "Atención", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String ruta = (String) modeloAudios.getValueAt(sel, 2);
+            File f = new File(ruta);
+            AppContextSingleton.get().setUltimoArchivoAudio(f);
+
+            JOptionPane.showMessageDialog(this,
+                    "Archivo seleccionado: " + ruta,
+                    "Info", JOptionPane.INFORMATION_MESSAGE);
+        });
 
         setTitle("Aplicación de procesamiento de texto con Arquitectura Plugin");
         setSize(800, 600);
@@ -89,7 +124,14 @@ public class VentanaPrincipal extends JFrame {
         // --- Panel Central (Outputs) ---
         JPanel panelCentral = new JPanel(new GridLayout(3, 2, 10, 10));
         panelCentral.add(createOutputPanel("Archivos de audio", new JTextArea(5, 20)));
-        panelCentral.add(createOutputPanel("Listado de archivos de audio", new JScrollPane(listadoArchivosArea)));
+        JPanel listadoContent = new JPanel(new BorderLayout());
+        listadoContent.add(new JScrollPane(tablaAudios), BorderLayout.CENTER);
+        listadoContent.add(btnSeleccionarAudio, BorderLayout.SOUTH);
+
+        JPanel panelListado = createOutputPanel("Listado de archivos de audio", listadoContent);
+
+        panelCentral.add(panelListado);
+
 
         // Panel de Reproducción integrado
         JPanel panelReproductor = createPlayerPanel();
@@ -113,8 +155,21 @@ public class VentanaPrincipal extends JFrame {
             grabarBtn.setEnabled(false);
             pararBtn.setEnabled(true);
             statusLabel.setText("Grabando...");
-            audioRecorder.startRecording(new File("grabacion_" + System.currentTimeMillis() + ".wav"));
+
+            // Crear carpeta "grabaciones" dentro del proyecto
+            File grabacionesDir = new File(System.getProperty("user.dir"), "grabaciones");
+            if (!grabacionesDir.exists()) {
+                grabacionesDir.mkdirs();
+            }
+
+            // Nombre único del archivo
+            String nombreArchivo = "grabacion_" + System.currentTimeMillis() + ".wav";
+            File outputFile = new File(grabacionesDir, nombreArchivo);
+
+            // Iniciar grabación en esa ruta
+            audioRecorder.startRecording(outputFile);
         });
+
 
         pararBtn.addActionListener(e -> {
             grabarBtn.setEnabled(true);
@@ -124,6 +179,9 @@ public class VentanaPrincipal extends JFrame {
             AppContextSingleton.get().setUltimoArchivoAudio(recordedFile);
             salidaMensajesArea.setText("Grabación finalizada. Archivo: " + recordedFile.getAbsolutePath());
         });
+
+
+
     }
 
     private JPanel createOutputPanel(String title, JComponent component) {
@@ -237,8 +295,29 @@ public class VentanaPrincipal extends JFrame {
                 salidaMensajesArea.setText(resultado);
                 break;
             case "Listar archivos guardados en base de datos":
-                listadoArchivosArea.setText(resultado);
+                modeloAudios.setRowCount(0);
+
+                Object data = contexto.getServicio("audiosBD");
+                if (data instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<org.example.model.ArchivoAudioMetadata> lista =
+                            (List<org.example.model.ArchivoAudioMetadata>) data;
+
+                    for (org.example.model.ArchivoAudioMetadata m : lista) {
+                        File f = m.getRuta() == null ? null : new File(m.getRuta());
+                        boolean exists = f != null && f.exists();
+                        modeloAudios.addRow(new Object[]{
+                                m.getId(),
+                                m.getNombre(),
+                                m.getRuta(),
+                                m.getFecha(),
+                                exists ? "Sí" : "No"
+                        });
+                    }
+                }
                 break;
+
+
             case "Obtener texto del archivo de audio":
                 textoAudioArea.setText(resultado);
                 break;

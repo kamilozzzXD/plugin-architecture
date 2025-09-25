@@ -17,7 +17,7 @@ public class AudioQueryService {
     private final String h2Password;
 
     public AudioQueryService() throws SQLException {
-        this.h2Url = "jdbc:h2:~/tabla";
+        this.h2Url = "jdbc:h2:file:./data/tabla";
         this.h2User = "sa";
         this.h2Password = "";
 

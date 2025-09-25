@@ -2,42 +2,35 @@ package org.example.plugins.listar;
 
 import org.example.core.AppContext;
 import org.example.interfaces.PluginFiltro;
+import org.example.model.ArchivoAudioMetadata;
 import org.example.plugins.listar.model.AudioMetadata;
 import org.example.plugins.listar.service.AudioQueryService;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Plugin que lista los audios guardados en BD y permite seleccionar uno
- * para usarlo como ultimoArchivoAudio en AppContext.
+ * Plugin que consulta los audios en la BD y los expone en el AppContext.
+ * La interfaz gráfica la maneja VentanaPrincipal.
  */
 public class ListarAudiosPlugin implements PluginFiltro {
 
     @Override
     public String getNombre() {
-        return "Listar audios en BD";
+        return "Listar archivos guardados en base de datos";
     }
 
     @Override
     public String getDescripcion() {
-        return "Consulta la base de datos H2 y muestra la lista de audios almacenados.";
+        return "Consulta la tabla AUDIOS en H2 y expone la lista en el contexto.";
     }
 
     @Override
     public boolean soportaTipo(String tipoArchivo) {
-        // No requiere archivo: soporta "desconocido" y "audio"
+        // Este plugin no depende de un archivo específico
         return "desconocido".equalsIgnoreCase(tipoArchivo) || "audio".equalsIgnoreCase(tipoArchivo);
     }
-    @Override
-    public boolean requiereArchivoInicial() {
-        return false;
-    }
-
 
     @Override
     public String ejecutar(AppContext contexto) {
@@ -57,74 +50,24 @@ public class ListarAudiosPlugin implements PluginFiltro {
             return "❌ Error al consultar BD: " + e.getMessage();
         }
 
-        if (lista.isEmpty()) {
-            JOptionPane.showMessageDialog(null,
-                    "No hay audios guardados en la base de datos.",
-                    "Información", JOptionPane.INFORMATION_MESSAGE);
+        if (lista == null || lista.isEmpty()) {
             return "ℹ️ BD vacía, sin audios.";
         }
 
-        // Preparar tabla
-        String[] columnNames = {"ID", "Nombre", "Ruta", "Fecha", "Existe"};
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
+        // Convertir a POJO conocido por el core
+        List<ArchivoAudioMetadata> coreList = new ArrayList<>();
         for (AudioMetadata m : lista) {
-            File f = m.getRuta() == null ? null : new File(m.getRuta());
-            boolean exists = f != null && f.exists();
-            model.addRow(new Object[]{
+            coreList.add(new ArchivoAudioMetadata(
                     m.getId(),
                     m.getNombre(),
                     m.getRuta(),
-                    m.getFecha(),
-                    exists ? "Sí" : "No"
-            });
+                    m.getFecha()
+            ));
         }
 
-        JTable table = new JTable(model);
-        JScrollPane scroll = new JScrollPane(table);
+        // Guardar la lista en el AppContext para que VentanaPrincipal la use
+        contexto.putServicio("audiosBD", coreList);
 
-        JButton btnSeleccionar = new JButton("Seleccionar");
-        JButton btnCerrar = new JButton("Cerrar");
-
-        JPanel panelBotones = new JPanel();
-        panelBotones.add(btnSeleccionar);
-        panelBotones.add(btnCerrar);
-
-        JDialog dialog = new JDialog((Frame) null, "Audios en BD", true);
-        dialog.setLayout(new BorderLayout());
-        dialog.add(scroll, BorderLayout.CENTER);
-        dialog.add(panelBotones, BorderLayout.SOUTH);
-        dialog.setSize(800, 300);
-        dialog.setLocationRelativeTo(null);
-
-        // Acción seleccionar
-        btnSeleccionar.addActionListener(e -> {
-            int sel = table.getSelectedRow();
-            if (sel < 0) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Selecciona primero un registro.",
-                        "Atención", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            String ruta = (String) model.getValueAt(sel, 2);
-            File f = new File(ruta);
-            contexto.setUltimoArchivoAudio(f);
-
-            JOptionPane.showMessageDialog(dialog,
-                    "Archivo seleccionado: " + ruta,
-                    "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-
-        // Acción cerrar
-        btnCerrar.addActionListener(e -> dialog.dispose());
-
-        dialog.setVisible(true);
-
-        return "OK: " + lista.size() + " audios listados.";
+        return "OK: " + coreList.size() + " audios listados.";
     }
 }
