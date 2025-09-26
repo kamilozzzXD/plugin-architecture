@@ -1,4 +1,4 @@
-C:\Users\camil\Downloads\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\api\AudioToTextService.java
-C:\Users\camil\Downloads\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\impl\VoskAudioToText.java
-C:\Users\camil\Downloads\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\Main.java
-C:\Users\camil\Downloads\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\util\AudioConverter.java
+C:\ProyectosU\IX\SoftwareII\plugin-arhcitecture\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\plugins\textoaaudio\api\AudioToTextService.java
+C:\ProyectosU\IX\SoftwareII\plugin-arhcitecture\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\plugins\textoaaudio\PluginObtenerTextoAAudio.java
+C:\ProyectosU\IX\SoftwareII\plugin-arhcitecture\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\plugins\textoaaudio\util\AudioConverter.java
+C:\ProyectosU\IX\SoftwareII\plugin-arhcitecture\plugin-architecture\ObtenerAudioATexto\src\main\java\org\example\plugins\textoaaudio\impl\VoskAudioToText.java

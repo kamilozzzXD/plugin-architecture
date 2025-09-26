@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="plugin-reproducir-audio" />
         <module name="Plugin-listar-archivos-guardados-BD" />
+        <module name="ObtenerCadenas" />
         <module name="ObtenerAudioATexto" />
         <module name="Plugin-persistir-archivo-Audio-BD" />
         <module name="app-core" />

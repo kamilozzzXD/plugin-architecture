@@ -15,7 +15,15 @@
         <module>plugin-listar-archivos-guardados-BD</module>
         <module>ObtenerTextoAAudio</module>
         <module>ObtenerAudioATexto</module>
+        <module>ObtenerCadenas</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>com.alphacephei</groupId>
+            <artifactId>vosk</artifactId>
+            <version>0.3.45</version>
+        </dependency>
+    </dependencies>
 
 
 
@@ -35,7 +43,7 @@
                 <configuration>
                     <executable>java</executable>
                     <workingDirectory>${basedir}/app-core</workingDirectory>
-                    <mainClass>org.example.Main</mainClass>
+                    <mainClass>org.example.TextoAAudio</mainClass>
                 </configuration>
             </plugin>
         </plugins>

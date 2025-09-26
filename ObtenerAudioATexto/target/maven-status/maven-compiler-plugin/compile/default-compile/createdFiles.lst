@@ -1,4 +1,4 @@
-org\example\Main.class
-org\example\util\AudioConverter.class
-org\example\impl\VoskAudioToText.class
-org\example\api\AudioToTextService.class
+org\example\plugins\textoaaudio\util\AudioConverter.class
+org\example\plugins\textoaaudio\api\AudioToTextService.class
+org\example\plugins\textoaaudio\PluginObtenerTextoAAudio.class
+org\example\plugins\textoaaudio\impl\VoskAudioToText.class

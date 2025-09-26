@@ -1,4 +1,4 @@
 mvn -pl app-core exec:java
 
 
-java -cp "app-core/target/app-core-1.0-SNAPSHOT.jar;plugin-reproducir-audio/target/plugin-reproducir-audio-1.0-SNAPSHOT.jar" org.example.Main
+java -cp "app-core/target/app-core-1.0-SNAPSHOT.jar;plugin-reproducir-audio/target/plugin-reproducir-audio-1.0-SNAPSHOT.jar" org.example.TextoAAudio

@@ -22,20 +22,21 @@ public class VentanaPrincipal extends JFrame {
     private final JTextArea listadoArchivosArea;
     private final JTextArea reproducirAudioArea;
     private final JTextArea textoAudioArea;
-    private final JTextArea cadenaEncontradaArea;
+    private JButton btnSeleccionarTexto;
+    private JLabel textoSeleccionadoLabel;
+
+    private JTextField cadenaBusquedaField;
 
     private JButton grabarBtn;
     private JButton pararBtn;
     private JLabel statusLabel;
 
-    // Controles de Reproducción
     private JButton playBtn;
     private JButton pauseBtn;
     private JButton resumeBtn;
     private JButton stopBtn;
     private Clip audioClip;
 
-    // Campos de VentanaPrincipal
     private JTable tablaAudios;
     private DefaultTableModel modeloAudios;
     private JButton btnSeleccionarAudio;
@@ -51,7 +52,10 @@ public class VentanaPrincipal extends JFrame {
         this.listadoArchivosArea = new JTextArea(5, 20);
         this.reproducirAudioArea = new JTextArea(5, 20);
         this.textoAudioArea = new JTextArea(5, 20);
-        this.cadenaEncontradaArea = new JTextArea(5, 20);
+
+        this.btnSeleccionarTexto = new JButton("Seleccionar archivo de texto");
+        this.textoSeleccionadoLabel = new JLabel("Ningún archivo de texto seleccionado.");
+        this.cadenaBusquedaField = new JTextField(20);
 
         String[] columnNames = {"ID", "Nombre", "Ruta", "Fecha", "Existe"};
         modeloAudios = new DefaultTableModel(columnNames, 0) {
@@ -63,7 +67,17 @@ public class VentanaPrincipal extends JFrame {
         tablaAudios = new JTable(modeloAudios);
         btnSeleccionarAudio = new JButton("Seleccionar");
 
-// Acción seleccionar
+        btnSeleccionarTexto.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(VentanaPrincipal.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File archivoSeleccionado = fileChooser.getSelectedFile();
+                AppContextSingleton.get().setUltimoArchivoTexto(archivoSeleccionado);
+                textoSeleccionadoLabel.setText("Archivo: " + archivoSeleccionado.getName());
+                salidaMensajesArea.setText("Archivo de texto seleccionado: " + archivoSeleccionado.getAbsolutePath());
+            }
+        });
+
         btnSeleccionarAudio.addActionListener(e -> {
             int sel = tablaAudios.getSelectedRow();
             if (sel < 0) {
@@ -86,10 +100,7 @@ public class VentanaPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        // --- Panel Principal ---
         JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
-
-        // --- Panel Superior (Botones de Carga y Grabación) ---
         JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT));
         grabarBtn = new JButton("Grabar");
         pararBtn = new JButton("Parar");
@@ -100,7 +111,6 @@ public class VentanaPrincipal extends JFrame {
         panelSuperior.add(pararBtn);
         panelSuperior.add(statusLabel);
 
-        // --- Panel Izquierdo (Componentes/Filtros) ---
         JPanel panelIzquierdo = new JPanel(new BorderLayout());
         JLabel componentesLabel = new JLabel("Componentes (filtros)");
         componentesLabel.setFont(new Font("Arial", Font.BOLD, 12));
@@ -116,12 +126,24 @@ public class VentanaPrincipal extends JFrame {
         }
 
         JButton ejecutarBtn = new JButton("Ejecutar filtro seleccionado");
+        ejecutarBtn.addActionListener(e -> {
+            for (Component comp : radioButtonsPanel.getComponents()) {
+                if (comp instanceof JRadioButton && ((JRadioButton) comp).isSelected()) {
+                    String nombrePlugin = ((JRadioButton) comp).getText();
+                    for (PluginFiltro plugin : plugins) {
+                        if (plugin.getNombre().equals(nombrePlugin)) {
+                            ejecutarFiltro(plugin);
+                            return;
+                        }
+                    }
+                }
+            }
+        });
 
         panelIzquierdo.add(componentesLabel, BorderLayout.NORTH);
         panelIzquierdo.add(radioButtonsPanel, BorderLayout.CENTER);
         panelIzquierdo.add(ejecutarBtn, BorderLayout.SOUTH);
 
-        // --- Panel Central (Outputs) ---
         JPanel panelCentral = new JPanel(new GridLayout(3, 2, 10, 10));
         panelCentral.add(createOutputPanel("Archivos de audio", new JTextArea(5, 20)));
         JPanel listadoContent = new JPanel(new BorderLayout());
@@ -129,47 +151,39 @@ public class VentanaPrincipal extends JFrame {
         listadoContent.add(btnSeleccionarAudio, BorderLayout.SOUTH);
 
         JPanel panelListado = createOutputPanel("Listado de archivos de audio", listadoContent);
-
         panelCentral.add(panelListado);
+        panelCentral.add(createOutputPanel("Obtener texto del archivo", new JScrollPane(textoAudioArea)));
 
+        JPanel panelSeleccionTexto = new JPanel(new BorderLayout());
+        panelSeleccionTexto.add(btnSeleccionarTexto, BorderLayout.NORTH);
+        panelSeleccionTexto.add(textoSeleccionadoLabel, BorderLayout.CENTER);
+        panelCentral.add(createOutputPanel("Seleccionar archivo de texto", panelSeleccionTexto));
 
-        // Panel de Reproducción integrado
         JPanel panelReproductor = createPlayerPanel();
         panelCentral.add(panelReproductor);
 
-        panelCentral.add(createOutputPanel("Obtener texto del archivo", new JScrollPane(textoAudioArea)));
+        JPanel panelBusqueda = new JPanel(new BorderLayout());
+        panelBusqueda.add(new JLabel("Introduce la cadena de texto a buscar:"), BorderLayout.NORTH);
+        panelBusqueda.add(cadenaBusquedaField, BorderLayout.CENTER);
+        panelCentral.add(createOutputPanel("Cadena de búsqueda", panelBusqueda));
 
-        // --- Panel Inferior (Salida de Mensajes) ---
-        JPanel panelInferior = new JPanel(new GridLayout(1, 2, 10, 10));
-        panelInferior.add(createOutputPanel("Salida de mensajes", new JScrollPane(salidaMensajesArea)));
-        panelInferior.add(createOutputPanel("Cadena de texto encontrada en los archivos", new JScrollPane(cadenaEncontradaArea)));
-
-        // Agregando paneles al frame principal
         add(panelSuperior, BorderLayout.NORTH);
         add(panelIzquierdo, BorderLayout.WEST);
         add(panelCentral, BorderLayout.CENTER);
-        add(panelInferior, BorderLayout.SOUTH);
+        add(createOutputPanel("Salida de mensajes", new JScrollPane(salidaMensajesArea)), BorderLayout.SOUTH);
 
-        // Eventos de Grabación
         grabarBtn.addActionListener(e -> {
             grabarBtn.setEnabled(false);
             pararBtn.setEnabled(true);
             statusLabel.setText("Grabando...");
-
-            // Crear carpeta "grabaciones" dentro del proyecto
             File grabacionesDir = new File(System.getProperty("user.dir"), "grabaciones");
             if (!grabacionesDir.exists()) {
                 grabacionesDir.mkdirs();
             }
-
-            // Nombre único del archivo
             String nombreArchivo = "grabacion_" + System.currentTimeMillis() + ".wav";
             File outputFile = new File(grabacionesDir, nombreArchivo);
-
-            // Iniciar grabación en esa ruta
             audioRecorder.startRecording(outputFile);
         });
-
 
         pararBtn.addActionListener(e -> {
             grabarBtn.setEnabled(true);
@@ -179,9 +193,6 @@ public class VentanaPrincipal extends JFrame {
             AppContextSingleton.get().setUltimoArchivoAudio(recordedFile);
             salidaMensajesArea.setText("Grabación finalizada. Archivo: " + recordedFile.getAbsolutePath());
         });
-
-
-
     }
 
     private JPanel createOutputPanel(String title, JComponent component) {
@@ -275,19 +286,27 @@ public class VentanaPrincipal extends JFrame {
         AppContext contexto = AppContextSingleton.get();
         FiltroExecutor executor = new FiltroExecutor();
 
-        // Check if the plugin is the "Reproducir archivo de audio" plugin
+        // VALIDACIÓN AÑADIDA PARA EVITAR CONFLICTOS
+        if (contexto.getUltimoArchivoTexto() != null && plugin.getNombre().equals("Listar archivos guardados en base de datos")) {
+            salidaMensajesArea.setText("Error: No puedes listar archivos de la base de datos si ya hay un archivo de texto seleccionado.");
+            return;
+        }
+
         if ("Reproducir archivo de audio".equals(plugin.getNombre())) {
             File audioFile = contexto.getUltimoArchivoAudio();
             if (audioFile == null || !audioFile.exists()) {
                 reproducirAudioArea.setText("No hay archivo de audio en el contexto.");
             } else {
-                // Simply update the text area, do not execute the plugin's 'ejecutar' method
                 reproducirAudioArea.setText("Listo para reproducir el archivo: " + audioFile.getName());
             }
-            return; // Exit the method here
+            return;
         }
 
-        // For all other plugins, execute them as normal
+        // Obtiene la cadena de búsqueda del campo de texto y la guarda en el contexto
+        String cadenaBusqueda = cadenaBusquedaField.getText();
+        contexto.putServicio("cadenaBusqueda", cadenaBusqueda);
+
+
         String resultado = executor.ejecutarFiltro(plugin, contexto);
 
         switch (plugin.getNombre()) {
@@ -323,10 +342,17 @@ public class VentanaPrincipal extends JFrame {
                 break;
             case "Leer archivo de texto - Convertir texto a archivo de audio":
                 salidaMensajesArea.setText("Ruta del audio generado: " + resultado);
-                reproducirAudioArea.setText("Listo para reproducir el audio generado del texto.");
+                reproducirAudioArea.setText("Listo para reproducir el audio generado del texto. Puedes usar los controles de abajo.");
+
+                playBtn.setEnabled(true);
+                pauseBtn.setEnabled(true);
+                resumeBtn.setEnabled(true);
+                stopBtn.setEnabled(true);
+
                 break;
+
             case "Buscar cadena de texto en archivo de texto":
-                cadenaEncontradaArea.setText(resultado);
+                salidaMensajesArea.setText(resultado);
                 break;
             default:
                 salidaMensajesArea.setText("Resultado del plugin " + plugin.getNombre() + ":\n" + resultado);

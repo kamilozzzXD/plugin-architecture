@@ -486,7 +486,7 @@ public class Main {
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>org.example.Main</mainClass>
+                    <mainClass>org.example.TextoAAudio</mainClass>
                 </configuration>
             </plugin>
         </plugins>

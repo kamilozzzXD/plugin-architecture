@@ -3,8 +3,13 @@ package org.example.core;
 import org.example.interfaces.PluginFiltro;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.logging.Logger;
 
 public class FiltroExecutor {
+
+    private static final Logger logger = Logger.getLogger(FiltroExecutor.class.getName());
 
     public String ejecutarFiltro(PluginFiltro filtro, AppContext contexto) {
         String tipo = obtenerTipoArchivo(contexto);

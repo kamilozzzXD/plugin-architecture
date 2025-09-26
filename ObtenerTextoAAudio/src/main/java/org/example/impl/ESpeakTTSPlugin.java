@@ -38,8 +38,14 @@ public class ESpeakTTSPlugin implements TTSPlugin {
             comando.add(rutaEspeak);
             comando.add("--path=eSpeak");
             comando.add("-v");
-            comando.add("es");
-            comando.add(texto);
+            comando.add(voz); // Utilizar la voz establecida
+            comando.add("-s");
+            comando.add(String.valueOf((int) (velocidad * 175)));
+            comando.add("-p");
+            comando.add(String.valueOf((int) (tono * 50 + 50)));
+            comando.add("-w"); // Flag para escribir la salida en un archivo
+            comando.add(outputPath); // Ruta del archivo de salida
+            comando.add(texto); // El texto a convertir
 
             ProcessBuilder pb = new ProcessBuilder(comando);
             Process proceso = pb.start();
@@ -57,7 +63,7 @@ public class ESpeakTTSPlugin implements TTSPlugin {
         try {
             List<String> comando = new ArrayList<>();
             comando.add(rutaEspeak);
-            comando.add(" --path=C:/Program Files (x86)/eSpeak ");
+            comando.add("--path=eSpeak"); // Corrección del path
             comando.add("-v");
             comando.add(voz);
             comando.add("-s");
